@@ -1,5 +1,11 @@
 # git-config-hooks-demo
 
+![Bash](https://img.shields.io/badge/Bash-4EAA25?style=for-the-badge&logo=gnu-bash&logoColor=white)
+![Git](https://img.shields.io/badge/Git%202.54+-F05032?style=for-the-badge&logo=git&logoColor=white)
+![macOS](https://img.shields.io/badge/macOS-000000?style=for-the-badge&logo=apple&logoColor=white)
+![Linux](https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black)
+![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)
+
 A **narrated, sandboxed, 60-second walkthrough** of Git 2.54's new config-based
 hooks. Run one command, watch a color-coded story play out across two fake
 repos, understand the feature end-to-end.
@@ -156,7 +162,7 @@ That's the whole thing.
 ### Controls
 
 | Variable | Effect | Default |
-|---|---|---|
+| --- | --- | --- |
 | `PAUSE=1` | Wait for Enter between scenes. Best for live presentations. | off |
 | `SPEED=N` | Seconds between beats when auto-pacing (`0` = instant). | `0.6` |
 
@@ -203,7 +209,7 @@ for deployment docs.
 Four hooks, one config fragment:
 
 | Hook | Event(s) | Action |
-|---|---|---|
+| --- | --- | --- |
 | `secret-scan` | `pre-commit`, `pre-push` | Block AWS keys, PEM keys, GitHub/Slack/OpenAI tokens, GCP service-account JSON. |
 | `no-direct-main` | `pre-commit` | Refuse commits on `main`/`master`/`trunk`/`production`/`release`. |
 | `conventional-commit` | `commit-msg` | Enforce `type(scope)!?: subject` with 72-char subject cap. |
@@ -273,7 +279,7 @@ show up in `git hook list --show-scope` as `hook from hookdir`.
 
 ## Directory layout
 
-```
+```text
 git-config-hooks-demo/
 ├── run.sh                       # the 9-scene narrated driver
 ├── lib.sh                       # ANSI colors + scene/run/pause helpers
