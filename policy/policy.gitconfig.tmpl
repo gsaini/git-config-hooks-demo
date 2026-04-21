@@ -1,0 +1,23 @@
+# Policy Bundle — Git 2.54 config-based hooks
+# Rendered at demo-runtime with __POLICY_ROOT__ replaced by the bundle's absolute path.
+# In production you'd ship this file alongside the hook scripts in a shared repo,
+# and reference it from /etc/gitconfig or ~/.gitconfig via:
+#     [include]
+#         path = /opt/org-policy/policy.gitconfig
+
+[hook "secret-scan"]
+	command = __POLICY_ROOT__/hooks/secret-scan.sh
+	event = pre-commit
+	event = pre-push
+
+[hook "no-direct-main"]
+	command = __POLICY_ROOT__/hooks/no-direct-main.sh
+	event = pre-commit
+
+[hook "conventional-commit"]
+	command = __POLICY_ROOT__/hooks/conventional-commit.sh
+	event = commit-msg
+
+[hook "tests-reminder"]
+	command = __POLICY_ROOT__/hooks/tests-reminder.sh
+	event = pre-push

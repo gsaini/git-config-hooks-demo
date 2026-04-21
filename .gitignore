@@ -1,0 +1,13 @@
+# Runtime sandbox created by run.sh — contains fake-home config and demo repos.
+# Safe to nuke at any time; never committed.
+/sandbox/
+
+# OS cruft
+.DS_Store
+Thumbs.db
+
+# Editor cruft
+.vscode/
+.idea/
+*.swp
+*.swo
