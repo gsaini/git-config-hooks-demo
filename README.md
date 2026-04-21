@@ -28,6 +28,112 @@ Every red `✗` you see is a hook correctly blocking a bad action. Every green
 
 ---
 
+## Visual overview
+
+### 1. How the Policy Bundle plugs in
+
+One `include.path` line pulls the bundle into the user's (or system's) git
+config. Each `[hook "..."]` stanza registers one hook against one-or-more
+events. No repo-local setup, no `core.hooksPath`.
+
+```text
+  ~/.gitconfig  ──include.path──▶  policy.gitconfig
+                                          │
+                ┌─────────────────┬───────┴─────────┬────────────────────┐
+                ▼                 ▼                 ▼                    ▼
+         hook.secret-scan  hook.no-direct-main  hook.conv-commit  hook.tests-reminder
+                │                 │                 │                    │
+         ┌──────┴──────┐          │                 │                    │
+         ▼             ▼          ▼                 ▼                    ▼
+    [pre-commit]  [pre-push]  [pre-commit]    [commit-msg]          [pre-push]
+         │             │          │                 │                    │
+         └─────────────┴──────────┴─────────────────┴────────────────────┘
+                                  │
+                                  ▼
+                     every repo on the machine
+```
+
+### 2. What fires on `git commit`
+
+Git parses config in **system → global → local** order, builds a per-event
+chain, and runs each entry in discovery order. Traditional
+`.git/hooks/<event>` scripts still run, last.
+
+```text
+  git commit -m "feat(x): ..."
+            │
+            ▼
+  ┌───────────────────────────────┐
+  │  parse config                 │
+  │  system → global → local      │
+  └───────────────┬───────────────┘
+                  │
+                  ▼
+  ┌───────────────────────────────┐
+  │  pre-commit chain             │
+  │    1. secret-scan.sh          │
+  │    2. no-direct-main.sh       │
+  │    3. .git/hooks/pre-commit   │  ◀── hookdir runs last
+  └───────────────┬───────────────┘
+                  │
+         any exits non-zero? ──── yes ──▶  ✗ commit blocked
+                  │
+                  no
+                  ▼
+  ┌───────────────────────────────┐
+  │  commit-msg chain             │
+  │    1. conventional-commit.sh  │
+  └───────────────┬───────────────┘
+                  │
+         subject valid? ──── no ──▶  ✗ commit blocked
+                  │
+                  yes
+                  ▼
+           ✓ commit created
+```
+
+### 3. The nine-scene demo journey
+
+```text
+  ┌───────────────────────────────────────────────────────────────────────┐
+  │  1 · Meet the Policy Bundle                 4 hooks, 1 fragment       │
+  └────────────────────────────────┬──────────────────────────────────────┘
+                                   ▼
+  ┌───────────────────────────────────────────────────────────────────────┐
+  │  2 · Install                                 [include] the bundle     │
+  └────────────────────────────────┬──────────────────────────────────────┘
+                                   ▼
+  ┌───────────────────────────────────────────────────────────────────────┐
+  │  3 · Two fresh repos                         zero per-repo setup      │
+  └────────────────────────────────┬──────────────────────────────────────┘
+                                   ▼
+  ┌───────────────────────────────────────────────────────────────────────┐
+  │  4 · Leaked credential      ✗ secret-scan + no-direct-main (parallel) │
+  └────────────────────────────────┬──────────────────────────────────────┘
+                                   ▼
+  ┌───────────────────────────────────────────────────────────────────────┐
+  │  5 · Fix leak                                ✗ no-direct-main alone   │
+  └────────────────────────────────┬──────────────────────────────────────┘
+                                   ▼
+  ┌───────────────────────────────────────────────────────────────────────┐
+  │  6 · Topic branch                            ✓ clean commit lands     │
+  └────────────────────────────────┬──────────────────────────────────────┘
+                                   ▼
+  ┌───────────────────────────────────────────────────────────────────────┐
+  │  7 · Per-repo opt-out              hook.<name>.enabled = false        │
+  └────────────────────────────────┬──────────────────────────────────────┘
+                                   ▼
+  ┌───────────────────────────────────────────────────────────────────────┐
+  │  8 · Scopes + events compose       local on top of global             │
+  └────────────────────────────────┬──────────────────────────────────────┘
+                                   ▼
+  ┌───────────────────────────────────────────────────────────────────────┐
+  │  9 · Coverage report                 + org rollout recipe             │
+  └───────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
 ## Requirements
 
 - **Git 2.54 or later.** `git --version` must report `2.54.0+`. Lower versions
